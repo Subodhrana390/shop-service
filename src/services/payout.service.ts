@@ -13,7 +13,7 @@ class PayoutService {
       timeout: 5000,
       headers: {
         "Content-Type": "application/json",
-        "X-Service-Name": "medical-shop-service",
+        "X-Service-Name": "payout-service",
       },
     });
   }

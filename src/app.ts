@@ -2,12 +2,12 @@ import cors from "cors";
 import express, { Express, Request, Response } from "express";
 import helmet from "helmet";
 import path from "path";
-import { errorHandler } from "./src/middlewares/errorMiddleware.js";
-import shopApplicationRouter from "./src/routes/shop-owner-application.routes.js";
-import shopAdminRouter from "./src/routes/shop.admin.routes.js";
-import internalRouter from "./src/routes/shop.internal.routes.js";
-import shopOwnerRouter from "./src/routes/shop.owner.routes.js";
-import shopPublicRouter from "./src/routes/shop.routes.js";
+import { errorHandler } from "./middlewares/errorMiddleware.js";
+import shopApplicationRouter from "./routes/shop-owner-application.routes.js";
+import shopAdminRouter from "./routes/shop.admin.routes.js";
+import internalRouter from "./routes/shop.internal.routes.js";
+import shopOwnerRouter from "./routes/shop.owner.routes.js";
+import shopPublicRouter from "./routes/shop.routes.js";
 
 const app: Express = express();
 

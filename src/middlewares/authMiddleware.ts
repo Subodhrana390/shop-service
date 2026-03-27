@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
-import MedicalShop from "../models/MedicalShop.js";
+import MedicalShop from "../models/Shop.js";
 
 export const protect = (
   req: Request,

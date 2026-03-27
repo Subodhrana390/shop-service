@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { config } from "./src/config/index.js";
-import MedicalShop from "./src/models/MedicalShop.js";
+import MedicalShop from "./src/models/Shop.js";
 import { ShopSearchService } from "./src/services/shop-search.service.js";
 
 const MONGO_URI = config.mongodb.uri;

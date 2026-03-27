@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
 import { Config } from "infra/interfaces/config.interface.js";
 import fs from 'fs';
+import path from "path/win32";
 
 dotenv.config({});
 
-const caPath = '/etc/secrets/ca.pem';
+const nodeEnv = process.env.NODE_ENV || 'development';
+
+const caPath = path.resolve(process.cwd(), nodeEnv === 'production' ? '/etc/secrets/ca.pem' : 'src/certs/ca.pem');
 
 const getCA = (): string[] | undefined => {
   if (fs.existsSync(caPath)) {
@@ -13,7 +16,6 @@ const getCA = (): string[] | undefined => {
   return undefined;
 };
 
-const nodeEnv = process.env.NODE_ENV || 'development';
 
 export const config: Config = {
   env: nodeEnv,
@@ -31,13 +33,13 @@ export const config: Config = {
     refreshTokenExpireIn: process.env.JWT_REFRESH_EXPIRE_IN || "7d",
   },
   kafka: {
-   brokers: process.env.APP_KAFKA_BROKER!,
+    brokers: process.env.APP_KAFKA_BROKER!,
     clientId: process.env.APP_SHOP_KAFKA_CLIENT_ID!,
     groupId: process.env.APP_SHOP_KAFKA_GROUP_ID!,
     retries: Number(process.env.APP_KAFKA_RETRIES || 5),
     retryDelay: Number(process.env.APP_KAFKA_RETRY_DELAY || 1000),
     sasl: {
-      mechanism: process.env.APP_KAFKA_SASL_MECHANISM!  as "plain" | "scram-sha-256" | "scram-sha-512",
+      mechanism: process.env.APP_KAFKA_SASL_MECHANISM! as "plain" | "scram-sha-256" | "scram-sha-512",
       username: process.env.APP_KAFKA_SASL_USERNAME!,
       password: process.env.APP_KAFKA_SASL_PASSWORD!,
     },
@@ -53,7 +55,7 @@ export const config: Config = {
     },
   },
   redis: {
-    uri: process.env.APP_REDIS_URL! 
+    uri: process.env.APP_REDIS_URL!
   },
   elasticSearch: {
     node: process.env.APP_ELASTICSEARCH_NODE!,

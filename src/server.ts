@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import app from "./app.js";
-import { config } from "./src/config/index.js";
-import { UserEventHandler } from "./src/events/eventHandlers.js";
-import { KafkaManager } from "./src/infra/kafka/index.js";
+import { config } from "./config/index.js";
+import { UserEventHandler } from "./events/eventHandlers.js";
+import { KafkaManager } from "./infra/kafka/index.js";
 
 const PORT = config.service.port;
 

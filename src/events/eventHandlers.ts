@@ -1,6 +1,6 @@
 import { config } from "../config/index.js";
 import { EVENT_TYPES, KafkaManager } from "../infra/kafka/index.js";
-import MedicalShop from "../models/MedicalShop.js";
+import MedicalShop from "../models/Shop.js";
 import { ShopSearchService } from "../services/shop-search.service.js";
 
 /* ------------------ TYPES ------------------ */

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { config } from "../config/index.js";
 import { EVENT_TYPES, KafkaManager } from "../infra/kafka/index.js";
 import { asyncHandler } from "../middlewares/asyncHandler.js";
-import MedicalShop from "../models/MedicalShop.js";
+import MedicalShop from "../models/Shop.js";
 import inventoryService from "../services/inventory.service.js";
 import payoutService from "../services/payout.service.js";
 import { ShopSearchService } from "../services/shop-search.service.js";
@@ -11,7 +11,7 @@ import userService from "../services/user.service.js";
 class ShopController {
   private static instance: ShopController;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ShopController {
     if (!ShopController.instance) {
@@ -201,7 +201,7 @@ class ShopController {
       },
     });
 
-    await ShopSearchService.indexShop(updatedShop).catch(() => {});
+    await ShopSearchService.indexShop(updatedShop).catch(() => { });
 
     res.json({
       success: true,
@@ -260,7 +260,7 @@ class ShopController {
         metadata: { userId: req.user?.id },
       });
 
-      await ShopSearchService.indexShop(shop).catch(() => {});
+      await ShopSearchService.indexShop(shop).catch(() => { });
 
       res.json({
         success: true,
@@ -294,7 +294,7 @@ class ShopController {
 
     await shop.save();
 
-    await ShopSearchService.indexShop(shop).catch(() => {});
+    await ShopSearchService.indexShop(shop).catch(() => { });
 
     await KafkaManager.publish({
       topic: config.kafka.topics.shopEvents,

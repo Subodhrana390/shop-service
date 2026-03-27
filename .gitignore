@@ -8,6 +8,7 @@
 
 # Ignore specific secret files you mentioned earlier
 /etc/secrets/ca.pem
+/src/certs/*.pem
 secrets/*.pem
 *.crt
 *.key

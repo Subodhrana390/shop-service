@@ -10,7 +10,7 @@ export interface IAddress {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  pincode: string;
   country: string;
   location: ILocation;
 }
@@ -61,7 +61,7 @@ export interface IDocuments {
   addressProof?: string;
 }
 
-export interface IMedicalShop extends Document {
+export interface IShop extends Document {
   id: string;
   name: string;
   ownerId: string;
@@ -132,7 +132,7 @@ const operatingHoursSchema = new Schema<IOperatingHours>(
   { _id: false },
 );
 
-const medicalShopSchema = new Schema<IMedicalShop>(
+const medicalShopSchema = new Schema<IShop>(
   {
     id: {
       type: String,
@@ -296,7 +296,7 @@ medicalShopSchema.index({ status: 1 });
 medicalShopSchema.index({ verificationStatus: 1 });
 medicalShopSchema.index({ "ratings.average": -1 });
 
-medicalShopSchema.methods.isOpenNow = function (this: IMedicalShop) {
+medicalShopSchema.methods.isOpenNow = function (this: IShop) {
   const now = new Date();
 
   const dayName = now
@@ -311,8 +311,8 @@ medicalShopSchema.methods.isOpenNow = function (this: IMedicalShop) {
   return currentTime >= todayHours.open && currentTime <= todayHours.close;
 };
 
-const MedicalShop: Model<IMedicalShop> = mongoose.model<IMedicalShop>(
+const Shop: Model<IShop> = mongoose.model<IShop>(
   "MedicalShop",
   medicalShopSchema,
 );
-export default MedicalShop;
+export default Shop;

@@ -24,7 +24,7 @@ class OrderService {
       timeout: 5000,
       headers: {
         "Content-Type": "application/json",
-        "X-Service-Name": "medical-shop-service",
+        "X-Service-Name": "order-service",
       },
     });
   }

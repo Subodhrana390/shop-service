@@ -1,11 +1,26 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.js";
-import MedicalShop from "../models/MedicalShop.js";
+import Shop, { IShop, ILocation, } from "../models/Shop.js";
+
+interface ShopDetails {
+  id: string;
+  name: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    location: ILocation;
+  };
+  contact: {
+    phone: string;
+  };
+}
 
 class InternalShopController {
   private static instance: InternalShopController;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): InternalShopController {
     if (!InternalShopController.instance) {
@@ -18,7 +33,7 @@ class InternalShopController {
     async (req: Request, res: Response) => {
       const { ownerId } = req.params;
 
-      const shop = await MedicalShop.findOne({ ownerId });
+      const shop = await Shop.findOne({ ownerId });
 
       if (!shop) {
         res.status(404).json({
@@ -46,7 +61,7 @@ class InternalShopController {
   public updateVerificationStatus = asyncHandler(
     async (req: Request, res: Response) => {
       const { status, note } = req.body;
-      const shop = await MedicalShop.findOne({
+      const shop = await Shop.findOne({
         id: req.params.shopId || req.shop?.id,
       });
 
@@ -70,7 +85,7 @@ class InternalShopController {
   public verifyShopOwner = asyncHandler(async (req: Request, res: Response) => {
     const { userId, shopId } = req.params;
 
-    const shop = await MedicalShop.findOne({
+    const shop = await Shop.findOne({
       id: req.params.shopId || req.shop?.id,
     });
 
@@ -91,7 +106,7 @@ class InternalShopController {
   });
 
   public getShopDetails = asyncHandler(async (req: Request, res: Response) => {
-    const shop = await MedicalShop.findOne({ id: req.params.shopId });
+    const shop = await Shop.findOne({ id: req.params.shopId });
 
     if (!shop) {
       const error: any = new Error("Shop not found");
@@ -110,6 +125,70 @@ class InternalShopController {
       data: shop,
     });
   });
-}
+
+  public getBatchShopDetails = asyncHandler(
+    async (req: Request, res: Response) => {
+
+      const { shopIds } = req.body;
+
+      /**
+       * Validate input
+       */
+      if (!Array.isArray(shopIds) || shopIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "shopIds must be a non-empty array",
+        });
+      }
+
+      /**
+       * Remove duplicates
+       */
+      const uniqueShopIds = [...new Set(shopIds)];
+
+      const shops = await Shop.find(
+        { id: { $in: uniqueShopIds } },
+        {
+          id: 1,
+          name: 1,
+          "address.street": 1,
+          "address.city": 1,
+          "address.state": 1,
+          "address.pincode": 1,
+          "address.location": 1,
+          "contactInfo.phone": 1,
+        }
+      ).lean();
+
+      const shopMap = new Map(shops.map(shop => [shop.id, shop]));
+
+      const shopDetails = uniqueShopIds
+        .map(id => shopMap.get(id))
+        .filter(Boolean)
+        .map(shop => ({
+          id: shop!.id,
+          name: shop!.name,
+          address: {
+            street: shop!.address.street,
+            city: shop!.address.city,
+            state: shop!.address.state,
+            pincode: shop!.address.pincode,
+            location: shop!.address.location,
+          },
+          contact: {
+            phone: shop!.contactInfo.phone,
+          },
+        }));
+
+
+      return res.json({
+        success: true,
+        count: shopDetails.length,
+        data: shopDetails,
+      });
+    }
+  );
+};
+
 
 export default InternalShopController.getInstance();
