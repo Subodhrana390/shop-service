@@ -10,7 +10,6 @@
     "dev": "tsx watch src/server.ts"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.3.2",
     "@opensearch-project/opensearch": "^3.5.1",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
