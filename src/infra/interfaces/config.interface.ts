@@ -42,7 +42,7 @@ export interface Config {
         node: string;
     };
     cloudinary: {
-        cloudname: string;
+        cloudName: string;
         apiKey: string;
         apiSecret: string;
     };

@@ -61,7 +61,7 @@ export const config: Config = {
     node: process.env.APP_ELASTICSEARCH_NODE!,
   },
   cloudinary: {
-    cloudname: process.env.APP_CLOUDINARY_CLOUD_NAME!,
+    cloudName: process.env.APP_CLOUDINARY_CLOUD_NAME!,
     apiKey: process.env.APP_CLOUDINARY_API_KEY!,
     apiSecret: process.env.APP_CLOUDINARY_API_SECRET!,
   },
