@@ -328,9 +328,10 @@ class ShopController {
       }
 
       const imageUrls = reqFiles.map((file, index) => ({
-        url: `/uploads/shops/${file.filename}`,
+        url: file.path,
         alt: req.body?.alt?.[index] || "",
         isPrimary: req.body?.isPrimary?.[index] === "true",
+        publicId: file.filename,
       }));
 
       await MedicalShop.findOneAndUpdate(

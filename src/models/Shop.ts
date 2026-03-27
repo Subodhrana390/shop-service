@@ -33,6 +33,7 @@ export interface IOperatingHours {
 
 export interface IImage {
   url: string;
+  publicId?: string;
   alt: string;
   isPrimary: boolean;
 }
@@ -200,6 +201,7 @@ const medicalShopSchema = new Schema<IShop>(
     images: [
       {
         url: { type: String, required: true },
+        publicId: { type: String },
         alt: { type: String, default: "" },
         isPrimary: { type: Boolean, default: false },
       },

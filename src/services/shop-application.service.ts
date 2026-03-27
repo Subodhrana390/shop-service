@@ -68,21 +68,22 @@ export class ShopApplicationService {
         }
 
         const images = files.images.map((file: any, index: number) => ({
-            url: `/uploads/shop-owner/${file.filename}`,
+            url: file.path,
+            publicId: file.filename,
             alt: "Shop Image",
             isPrimary: index === 0,
         }));
 
         const documents = {
-            license: `/uploads/shop-owner/${files.license[0].filename}`,
-            gstCertificate: `/uploads/shop-owner/${files.gstCertificate[0].filename}`,
+            license: files.license[0].path,
+            gstCertificate: files.gstCertificate && files.gstCertificate.length > 0 ? files.gstCertificate[0].path : "",
         };
 
         const ownerDocuments = {
-            identityProof: `/uploads/shop-owner/${files.identityProof[0].filename}`,
-            panCard: `/uploads/shop-owner/${files.panCard[0].filename}`,
-            ownerPhoto: `/uploads/shop-owner/${files.ownerPhoto[0].filename}`,
-            addressProof: `/uploads/shop-owner/${files.addressProof[0].filename}`,
+            identityProof: files.identityProof[0].path,
+            panCard: files.panCard[0].path,
+            ownerPhoto: files.ownerPhoto[0].path,
+            addressProof: files.addressProof[0].path,
         };
 
         const application = await ShopOwnerApplication.create({

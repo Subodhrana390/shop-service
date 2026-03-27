@@ -3,29 +3,20 @@ import multer, {
   MulterError,
   StorageEngine,
 } from "multer";
-import sharp from "sharp";
-import path from "path";
-import fs from "fs";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
 import { Request, Response, NextFunction } from "express";
 
-const createUploadDir = (dir: string): void => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-};
-
-const createStorage = (destination: string): StorageEngine => {
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = path.join("uploads", destination);
-      createUploadDir(uploadPath);
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix =
-        Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const extension = path.extname(file.originalname);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
+const createCloudinaryStorage = (folderInfo: string) => {
+  return new CloudinaryStorage({
+    cloudinary: (cloudinary as any),
+    params: async (req: Request, file: Express.Multer.File) => {
+      const fileExtension = file.mimetype.split("/")[1] || "jpg";
+      return {
+        folder: `medicine-finder/shops/${folderInfo}`,
+        public_id: `${Date.now()}-${file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_")}`,
+        format: fileExtension === "pdf" ? "pdf" : undefined, // let Cloudinary auto-detect for images, specify for pdf
+      };
     },
   });
 };
@@ -64,7 +55,7 @@ const documentFilter = (
 };
 
 export const uploadShopImages = multer({
-  storage: createStorage("shops"),
+  storage: createCloudinaryStorage("images"),
   fileFilter: imageFilter,
   limits: {
     fileSize: 2 * 1024 * 1024, // 2MB
@@ -73,7 +64,7 @@ export const uploadShopImages = multer({
 });
 
 export const uploadMedicineImages = multer({
-  storage: multer.memoryStorage(),
+  storage: createCloudinaryStorage("medicines"),
   fileFilter: imageFilter,
   limits: {
     fileSize: 2 * 1024 * 1024, // 2MB
@@ -82,7 +73,7 @@ export const uploadMedicineImages = multer({
 });
 
 export const uploadShopDocuments = multer({
-  storage: createStorage("documents/shops"),
+  storage: createCloudinaryStorage("documents"),
   fileFilter: documentFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
@@ -91,7 +82,7 @@ export const uploadShopDocuments = multer({
 });
 
 export const uploadShopOwnerApplication = multer({
-  storage: createStorage("shop-owner"),
+  storage: createCloudinaryStorage("applications"),
   fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
     const isImage = file.mimetype.startsWith("image/");
     const isPDF = file.mimetype === "application/pdf";
@@ -111,55 +102,9 @@ export const processImages = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const files = req.files as Express.Multer.File[] | undefined;
-
-  if (!files || files.length === 0) return next();
-
-  try {
-    const processedFiles: Express.Multer.File[] = [];
-
-    for (const file of files) {
-      const inputPath = file.path;
-      const outputPath = path.join(
-        path.dirname(inputPath),
-        "processed-" + path.basename(inputPath)
-      );
-
-      await sharp(inputPath)
-        .resize(800, 600, {
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .jpeg({ quality: 80 })
-        .toFile(outputPath);
-
-      fs.unlinkSync(inputPath);
-      fs.renameSync(outputPath, inputPath);
-
-      processedFiles.push({
-        ...file,
-        path: inputPath,
-        size: fs.statSync(inputPath).size,
-      });
-    }
-
-    req.files = processedFiles;
-    next();
-  } catch (error) {
-    if (files) {
-      files.forEach((file) => {
-        if (file.path && fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      });
-    }
-
-    const err = new Error("Image processing failed") as Error & {
-      statusCode?: number;
-    };
-    err.statusCode = 500;
-    next(err);
-  }
+  // Cloudinary handles image processing (resizing/optimizing) via its delivery URLs.
+  // We can skip the local sharp processing.
+  next();
 };
 
 export const validateUploads = (
