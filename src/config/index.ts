@@ -7,7 +7,7 @@ dotenv.config({});
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-const caPath = path.resolve(process.cwd(), nodeEnv === 'production' ? '/etc/secrets/ca.pem' : 'src/certs/ca.pem');
+const caPath = nodeEnv === 'production' ? '/etc/secrets/ca.pem' : path.resolve(process.cwd(), 'src/certs/ca.pem');
 
 const getCA = (): string[] | undefined => {
   if (fs.existsSync(caPath)) {

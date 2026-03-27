@@ -8,7 +8,7 @@ const addressSchema = new Schema<IAddress>(
         street: { type: String, required: true, trim: true },
         city: { type: String, required: true, trim: true },
         state: { type: String, required: true, trim: true },
-        zipCode: { type: String, required: true, trim: true },
+        pincode: { type: String, required: true, trim: true },
         country: { type: String, default: "India" },
         location: {
             type: {
