@@ -384,7 +384,7 @@ class ShopController {
       };
 
       try {
-        inventorySummary = await inventoryService.getInventoryStats(
+        inventorySummary = await inventoryService.getInventoryReport(
           shop.id.toString(),
         );
       } catch (err: any) {

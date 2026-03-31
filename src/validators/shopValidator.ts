@@ -9,17 +9,18 @@ export const indianPhoneSchema = z
 /* ------------------ ADDRESS ------------------ */
 
 export const addressSchema = z.object({
+  full_name: z.string().min(3).max(100),
   street: z.string().min(5, "Street address must be at least 5 characters"),
   city: z.string().min(2, "City must be at least 2 characters"),
   state: z.string().min(2, "State must be at least 2 characters"),
-  zipCode: z.string().regex(/^\d{6}$/, "ZIP code must be 6 digits"),
+  postalCode: z.string().regex(/^\d{6}$/, "ZIP code must be 6 digits"),
   country: z.string().default("India"),
   location: z
     .object({
       type: z.literal("Point").default("Point"),
       coordinates: z.tuple([
-        z.number().min(-180).max(180), // longitude
-        z.number().min(-90).max(90), // latitude
+        z.number().min(-180).max(180),
+        z.number().min(-90).max(90),
       ]),
     })
     .optional(),

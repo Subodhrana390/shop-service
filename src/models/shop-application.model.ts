@@ -1,27 +1,30 @@
 import mongoose, { Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import { IAddress, IOwnerDocuments, IShopApplication, IShopData, IShopDocuments, IShopImage } from "../infra/kafka/interfaces/shop-application.interface.js";
+import { IAddress, ILocation, IOwnerDocuments, IShopApplication, IShopData, IShopDocuments, IShopImage } from "../infra/kafka/interfaces/shop-application.interface.js";
 
+const locationSchema = new Schema<ILocation>(
+    {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    },
+    { _id: false },
+);
 
 const addressSchema = new Schema<IAddress>(
     {
         street: { type: String, required: true, trim: true },
         city: { type: String, required: true, trim: true },
         state: { type: String, required: true, trim: true },
-        pincode: { type: String, required: true, trim: true },
+        postalCode: { type: String, required: true, trim: true },
         country: { type: String, default: "India" },
-        location: {
-            type: {
-                type: String,
-                enum: ["Point"],
-                required: true,
-                default: "Point",
-            },
-            coordinates: {
-                type: [Number],
-                required: true,
-            },
-        },
+        location: locationSchema
     },
     { _id: false },
 );

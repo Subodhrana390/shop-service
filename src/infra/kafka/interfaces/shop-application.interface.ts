@@ -1,15 +1,17 @@
 import { Document } from "mongoose";
 
+export interface ILocation {
+    type: "Point";
+    coordinates: number[];
+}
+
 export interface IAddress {
     street: string;
     city: string;
     state: string;
-    pincode: string;
+    postalCode: string;
     country: string;
-    location: {
-        type: "Point";
-        coordinates: number[];
-    };
+    location: ILocation;
 }
 
 export interface IOwnerDocuments {

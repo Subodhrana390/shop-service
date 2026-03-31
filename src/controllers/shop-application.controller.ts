@@ -28,7 +28,7 @@ export class ShopApplicationController {
         const application = await shopApplicationService.reviewApplication(
             applicationId,
             req.user.id,
-            parsed.status as any,
+            parsed.status,
             parsed.rejectionReason
         );
 

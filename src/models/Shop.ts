@@ -10,7 +10,7 @@ export interface IAddress {
   street: string;
   city: string;
   state: string;
-  pincode: string;
+  postalCode: string;
   country: string;
   location: ILocation;
 }
@@ -92,7 +92,7 @@ const addressSchema = new Schema<IAddress>({
   street: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },
-  pincode: { type: String, required: true },
+  postalCode: { type: String, required: true },
   country: { type: String, default: "India" },
   location: {
     type: {
