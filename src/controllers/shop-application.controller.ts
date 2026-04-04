@@ -11,6 +11,19 @@ export class ShopApplicationController {
         return res.status(200).json(new ApiResponse(200, result, "Shop application fetched successfully"));
     });
 
+    getAllApplications = asyncHandler(async (req: Request, res: Response) => {
+        if (!req.user) throw new Error("Not authenticated");
+        const result = await shopApplicationService.getAllApplications();
+        return res.status(200).json(new ApiResponse(200, result, "Shop applications fetched successfully"));
+    });
+
+    getShopApplicationById = asyncHandler(async (req: Request, res: Response) => {
+        if (!req.user) throw new Error("Not authenticated");
+        const applicationId = req.params.applicationId as string;
+        const result = await shopApplicationService.getApplicationById(applicationId);
+        return res.status(200).json(new ApiResponse(200, result, "Shop application fetched successfully"));
+    });
+
     applyToBecomeShopOwner = asyncHandler(async (req: Request, res: Response) => {
         if (!req.user) throw new Error("Not authenticated");
         const files = (req.files as { [fieldname: string]: Express.Multer.File[] }) || {};
@@ -28,7 +41,7 @@ export class ShopApplicationController {
         const application = await shopApplicationService.reviewApplication(
             applicationId,
             req.user.id,
-            parsed.status as any,
+            parsed.status,
             parsed.rejectionReason
         );
 

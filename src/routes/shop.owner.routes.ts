@@ -10,19 +10,19 @@ const {
 } = shopController;
 
 import {
-    protect,
-    requireShopOwnership,
+  protect,
+  requireShopOwnership,
 } from "../middlewares/authMiddleware.js";
 
 import {
-    handleMulterError,
-    uploadShopImages as shopImagesUpload,
-    validateUploads,
+  handleMulterError,
+  uploadShopImages as shopImagesUpload,
+  validateUploads,
 } from "../middlewares/uploadMiddleware.js";
 
 import {
-    updateShopSchema,
-    updateShopStatusSchema,
+  updateShopSchema,
+  updateShopStatusSchema,
 } from "../validators/shopValidator.js";
 
 import { validate } from "../utils/index.js";
@@ -33,11 +33,11 @@ router.use(protect, requireShopOwnership);
 
 router.get("/", getMyMedicalShop);
 
-router.put("/", validate(updateShopSchema) as any, updateShop);
+router.put("/", validate(updateShopSchema), updateShop);
 
 router.patch(
   "/status",
-  validate(updateShopStatusSchema) as any,
+  validate(updateShopStatusSchema),
   updateShopStatus,
 );
 
@@ -46,7 +46,7 @@ router.get("/dashboard", getShopDashboard);
 router.post(
   "/images",
   shopImagesUpload.array("images", 5),
-  validateUploads as any,
+  validateUploads,
   uploadShopImagesById,
 );
 

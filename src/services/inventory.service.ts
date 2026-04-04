@@ -48,18 +48,11 @@ class InventoryService {
     return data.data;
   }
 
-  async getInventoryAlerts(shopId: string): Promise<any> {
+  async getInventoryReport(shopId: string): Promise<any> {
     const { data } = await this.client.get(
-      `/api/v1/internal/inventory/shop/${shopId}/alerts`
+      `/api/v1/internal/inventory/shop/${shopId}/reports`
     );
-    return data.data;
-  }
-
-  async getInventoryStats(shopId: string): Promise<any> {
-    const { data } = await this.client.get(
-      `/api/v1/internal/inventory/shop/${shopId}/stats`
-    );
-    return data.data;
+    return data.stats;
   }
 
   async addInventoryItem(itemData: any): Promise<any> {

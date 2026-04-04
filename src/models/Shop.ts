@@ -92,7 +92,7 @@ const addressSchema = new Schema<IAddress>({
   street: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },
-  pincode: { type: String, required: true },
+  pincode: { type: String },
   country: { type: String, default: "India" },
   location: {
     type: {
@@ -254,14 +254,6 @@ const medicalShopSchema = new Schema<IShop>(
       ifscCode: { type: String, trim: true },
     },
 
-    paymentMethods: [
-      {
-        type: String,
-        enum: ["cash", "card", "upi", "net-banking", "wallet"],
-        default: ["cash"],
-      },
-    ],
-
     tags: [
       {
         type: String,
@@ -297,6 +289,7 @@ medicalShopSchema.index({ ownerId: 1 });
 medicalShopSchema.index({ status: 1 });
 medicalShopSchema.index({ verificationStatus: 1 });
 medicalShopSchema.index({ "ratings.average": -1 });
+medicalShopSchema.index({ createdAt: -1, id: -1 });
 
 medicalShopSchema.methods.isOpenNow = function (this: IShop) {
   const now = new Date();

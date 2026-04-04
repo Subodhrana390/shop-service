@@ -7,6 +7,8 @@ import inventoryService from "../services/inventory.service.js";
 import payoutService from "../services/payout.service.js";
 import { ShopSearchService } from "../services/shop-search.service.js";
 import userService from "../services/user.service.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "utils/ApiError.js";
 
 class ShopController {
   private static instance: ShopController;
@@ -209,65 +211,69 @@ class ShopController {
       data: updatedShop,
     });
   });
-
   public updateShopStatus = asyncHandler(
     async (req: Request, res: Response) => {
       const { status, reason } = req.body;
-      const shop = await MedicalShop.findOne({ id: req.shop?.id });
+      const shopId = req.params.shopId || req.shop?.id;
+
+      if (!shopId) {
+        return res.status(400).json({
+          message: "Shop ID is required",
+        });
+      }
+
+      const shop = await MedicalShop.findOne({ id: shopId });
 
       if (!shop) {
-        const error: any = new Error("Shop not found");
-        error.statusCode = 404;
-        throw error;
+        return res.status(404).json({
+          message: "Shop not found",
+        });
       }
 
       const allowedStatuses = ["pending", "active", "inactive", "suspended"];
-      if (!allowedStatuses.includes(status)) {
-        const error: any = new Error(
-          `Invalid status. Allowed: ${allowedStatuses.join(", ")}`,
-        );
-        error.statusCode = 400;
-        throw error;
+
+      if (!status || !allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          message: `Invalid status. Allowed: ${allowedStatuses.join(", ")}`,
+        });
       }
 
       if (req.user?.role === "shop-owner" && status === "suspended") {
-        const error: any = new Error(
-          "Shop owners cannot suspend their own shop",
-        );
-        error.statusCode = 403;
-        throw error;
+        return res.status(403).json({
+          message: "Shop owners cannot suspend their own shop",
+        });
       }
 
       if (shop.status === status) {
-        res.status(400).json({ message: `Shop is already ${status}` });
-        return;
+        return res.status(400).json({
+          message: `Shop is already ${status}`,
+        });
       }
 
       const oldStatus = shop.status;
       shop.status = status;
+
       await shop.save();
 
-      await KafkaManager.publish({
+      KafkaManager.publish({
         topic: config.kafka.topics.shopEvents,
         eventType: EVENT_TYPES.SHOP_STATUS_CHANGED,
         payload: {
           shopId: shop.id,
-          ownerId: shop.ownerId,
+          userId: shop.ownerId,
           oldStatus,
           newStatus: status,
           reason: reason || "",
         },
         metadata: { userId: req.user?.id },
-      });
+      }).catch(() => { });
 
-      await ShopSearchService.indexShop(shop).catch(() => { });
+      ShopSearchService.indexShop(shop).catch(() => { });
 
-      res.json({
-        success: true,
-        message: `Shop status updated to ${status}`,
-        data: shop,
-      });
-    },
+      return res.json(
+        new ApiResponse(200, shop, `Shop status updated to ${status}`)
+      );
+    }
   );
 
   public verifyShop = asyncHandler(async (req: Request, res: Response) => {
@@ -384,7 +390,7 @@ class ShopController {
       };
 
       try {
-        inventorySummary = await inventoryService.getInventoryStats(
+        inventorySummary = await inventoryService.getInventoryReport(
           shop.id.toString(),
         );
       } catch (err: any) {
@@ -467,6 +473,75 @@ class ShopController {
       });
     },
   );
+
+  public getAllShops = asyncHandler(async (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const cursor = req.query.cursor as string;
+
+    let query: any = {};
+
+    if (cursor) {
+      const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
+      const [dateStr, id] = decoded.split('|');
+
+      if (dateStr && id) {
+        query = {
+          $or: [
+            { createdAt: { $lt: new Date(dateStr) } },
+            {
+              createdAt: new Date(dateStr),
+              id: { $lt: id }
+            }
+          ]
+        };
+      }
+    }
+
+    const shops = await MedicalShop.find(query)
+      .sort({ createdAt: -1, id: -1 })
+      .limit(limit + 1)
+      .lean();
+
+    const hasMore = shops.length > limit;
+    if (hasMore) shops.pop();
+
+    const data = shops.map(({ _id, ...rest }: any) => ({ ...rest }));
+
+    let nextCursor = null;
+    if (hasMore && data.length > 0) {
+      const lastItem = data[data.length - 1];
+      const rawCursor = `${lastItem.createdAt.toISOString()}|${lastItem.id}`;
+      nextCursor = Buffer.from(rawCursor).toString('base64');
+    }
+
+    res.json(new ApiResponse(200, {
+      shops: data,
+      pagination: {
+        nextCursor,
+        limit,
+        hasMore
+      },
+    }, "Shops fetched successfully"
+    ));
+  });
+
+  public suspendShop = asyncHandler(async (req: Request, res: Response) => {
+    const { shopId } = req.params;
+
+    const shop = await MedicalShop.findOne({ id: shopId });
+
+    if (!shop) {
+      const error: any = new Error("Shop not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    shop.status = "suspended";
+    await shop.save();
+
+    res.json(new ApiResponse(200, shop, "Shop suspended successfully"));
+  });
+
 }
 
 export default ShopController.getInstance();

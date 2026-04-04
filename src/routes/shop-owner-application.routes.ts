@@ -9,6 +9,8 @@ const router = Router();
 router.use(protect);
 
 router.get("/application", shopApplicationController.getShopApplication);
+router.get("/application/all", authorize("admin") as any, shopApplicationController.getAllApplications);
+router.get("/:applicationId/application", authorize("admin") as any, shopApplicationController.getShopApplicationById);
 
 router.post(
   "/apply-to-become-shopOwner",
@@ -26,7 +28,7 @@ router.post(
 );
 
 router.patch(
-  "/admin/:applicationId/review",
+  "/:applicationId/review",
   authorize("admin") as any,
   shopApplicationController.reviewShopOwnerApplication,
 );

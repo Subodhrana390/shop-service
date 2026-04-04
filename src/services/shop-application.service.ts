@@ -44,6 +44,51 @@ export class ShopApplicationService {
         };
     }
 
+    async getAllApplications() {
+        const applications = await ShopOwnerApplication.find()
+            .sort({ createdAt: -1 });
+
+        return applications;
+    }
+
+    async getApplicationById(applicationId: string) {
+        const application = await ShopOwnerApplication.findOne({ id: applicationId });
+
+        if (!application) {
+            return { applied: false, message: "No shop owner application found" };
+        }
+
+        let canReapply = false;
+        let retryAfterDays = 0;
+
+        if (application.status === "rejected" && application.rejectedAt) {
+            const COOLDOWN_DAYS = 7;
+            const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+            const remainingMs = COOLDOWN_MS - (Date.now() - application.rejectedAt.getTime());
+
+            if (remainingMs <= 0) {
+                canReapply = true;
+            } else {
+                retryAfterDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+            }
+        }
+
+        return {
+            applied: true,
+            data: {
+                applicationId: application.id,
+                status: application.status,
+                rejectionReason: application.rejectionReason,
+                rejectedAt: application.rejectedAt,
+                reviewedAt: application.reviewedAt,
+                reapplyCount: application.reapplyCount,
+                canReapply,
+                retryAfterDays,
+                appliedAt: application.createdAt,
+            },
+        };
+    }
+
     async submitApplication(userId: string, data: any, files: any) {
         const COOLDOWN_DAYS = 7;
         const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;

@@ -15,5 +15,8 @@ router.patch(
     authorize("admin"),
     shopController.verifyShop
 );
+router.get("/all-shops", protect, authorize("admin"), shopController.getAllShops);
+router.get('/:shopId/details', protect, authorize("admin"), shopController.getShopById);
+router.patch('/:shopId/status', protect, authorize("admin"), shopController.updateShopStatus);
 
 export default router;
