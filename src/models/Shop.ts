@@ -10,7 +10,7 @@ export interface IAddress {
   street: string;
   city: string;
   state: string;
-  postalCode: string;
+  pincode: string;
   country: string;
   location: ILocation;
 }
